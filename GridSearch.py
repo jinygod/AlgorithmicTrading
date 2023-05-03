@@ -4,8 +4,9 @@ import yfinance as yf
 from sklearn.model_selection import TimeSeriesSplit
 
 def backtest_strategy(data, k):
+    data = data.copy()
     data['Range'] = data['High'].shift(1) - data['Low'].shift(1)
-    data['Target'] = data['Close'].shift(1) + k * data['Range']
+    data.loc[:, 'Target'] = data['Close'].shift(1) + k * data['Range']
     data['Signal'] = 0
 
     data.loc[data['High'] > data['Target'], 'Signal'] = 1
@@ -26,12 +27,13 @@ def backtest_strategy(data, k):
     final_balance = balance + position * data.iloc[-1]['Close']
     return (final_balance / initial_balance - 1) * 100
 
-ticker = 'TQQQ'
-start_date = '2023-01-01'
+ticker = 'LABU'
+start_date = '2018-01-01'
 end_date = '2023-05-03'
 data = yf.download(ticker, start=start_date, end=end_date)
 
-k_values = np.arange(0.1, 10.1, 0.1)
+# k값 0.01부터 1까지 0.01씩 올려가며 그리드서치 진행
+k_values = np.arange(0.01, 1.01, 0.01)
 tscv = TimeSeriesSplit(n_splits=5)
 
 best_k = None
