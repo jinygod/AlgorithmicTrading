@@ -4,13 +4,13 @@ import yfinance as yf
 import matplotlib.pyplot as plt
 
 # 데이터 다운로드
-ticker = 'QQQ'
-start_date = '2018-01-01'
-end_date = '2023-12-31'
+ticker = 'TQQQ'
+start_date = '2023-01-01'
+end_date = '2023-05-03'
 data = yf.download(ticker, start=start_date, end=end_date)
 
 # 변동성 돌파 전략 파라미터
-k = 0.5
+k = 0.6
 
 # 전략에 필요한 데이터 계산
 data['ATR'] = data['High'] - data['Low']
@@ -37,8 +37,14 @@ for idx, row in data.iterrows():
 
 final_balance = balance + position * data.iloc[-1]['Close']
 print("Initial balance: ", initial_balance)
-print("Final balance: ", final_balance)
-print("Return: ", (final_balance / initial_balance - 1) * 100, "%")
+print("Final balance (Volatility Breakout Strategy): ", final_balance)
+print("Return (Volatility Breakout Strategy): ", (final_balance / initial_balance - 1) * 100, "%")
+
+# 일반 매수 후 수익률 계산
+initial_investment = 100000
+investment_result = initial_investment * (data.iloc[-1]['Close'] / data.iloc[0]['Close'])
+print("Final balance (Buy and Hold): ", investment_result)
+print("Return (Buy and Hold): ", (investment_result / initial_investment - 1) * 100, "%")
 
 # 주가 차트 및 거래 신호 표시
 plt.figure(figsize=(14, 7))
