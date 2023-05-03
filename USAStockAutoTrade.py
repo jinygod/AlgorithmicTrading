@@ -85,7 +85,7 @@ def get_target_price(market="NAS", code="AAPL"):
     stck_oprc = float(res.json()['output2'][0]['open']) #오늘 시가
     stck_hgpr = float(res.json()['output2'][1]['high']) #전일 고가
     stck_lwpr = float(res.json()['output2'][1]['low']) #전일 저가
-    target_price = stck_oprc + (stck_hgpr - stck_lwpr) * 0.5
+    target_price = stck_oprc + (stck_hgpr - stck_lwpr) * 0.3 # TQQQ 최적 K값
     return target_price
 
 def get_stock_balance():
@@ -237,7 +237,7 @@ def get_exchange_rate():
 try:
     ACCESS_TOKEN = get_access_token()
 
-    nasd_symbol_list = ["AAPL"] # 매수 희망 종목 리스트 (NASD)
+    nasd_symbol_list = ["TQQQ", "LABU"] # 매수 희망 종목 리스트 (NASD)
     nyse_symbol_list = ["KO"] # 매수 희망 종목 리스트 (NYSE)
     amex_symbol_list = ["LIT"] # 매수 희망 종목 리스트 (AMEX)
     symbol_list = nasd_symbol_list + nyse_symbol_list + amex_symbol_list
@@ -247,8 +247,8 @@ try:
     stock_dict = get_stock_balance() # 보유 주식 조회
     for sym in stock_dict.keys():
         bought_list.append(sym)
-    target_buy_count = 3 # 매수할 종목 수
-    buy_percent = 0.33 # 종목당 매수 금액 비율
+    target_buy_count = 2 # 매수할 종목 수
+    buy_percent = 0.50 # 종목당 매수 금액 비율
     buy_amount = total_cash * buy_percent / exchange_rate # 종목별 주문 금액 계산 (달러)
     soldout = False
 
