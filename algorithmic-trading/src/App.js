@@ -1,14 +1,26 @@
 import React from "react";
+import { BrowserRouter as Router, Route, Link } from "react-router-dom";
 import "./App.css";
 
-function Sidebar() {
+function Navbar() {
   return (
-    <div className="sidebar">
-      <h3>ATM 이란?</h3>
+    <div className="navbar">
+      <a href="/">
+        <h3>ATM LOGO</h3>
+      </a>
       <ul>
-        <li></li>
-        <li>항목 2</li>
-        <li>항목 3</li>
+        <li>
+          <a href="/menu1">ATM이란?</a>
+        </li>
+        <li>
+          <a href="/menu2">ATM 사용하기</a>
+        </li>
+        <li>
+          <a href="/menu3">백테스트</a>
+        </li>
+        <li>
+          <a href="/menu4">ATM 메뉴얼</a>
+        </li>
       </ul>
     </div>
   );
@@ -17,8 +29,8 @@ function Sidebar() {
 function App() {
   return (
     <div className="App">
-      <Sidebar />
-      {/* 사이드바 외의 주요 컨텐츠를 여기에 추가 */}
+      <Navbar />
+      {/* navbar 외의 주요 컨텐츠를 여기에 추가 */}
     </div>
   );
 }
