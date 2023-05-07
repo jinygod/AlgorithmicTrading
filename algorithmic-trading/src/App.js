@@ -1,37 +1,56 @@
 import React from "react";
-import { BrowserRouter as Router, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Route, Link, Routes } from "react-router-dom";
 import "./App.css";
+import Menu1 from "./components/Menu1";
+import Menu2 from "./components/Menu2";
+import Menu3 from "./components/Menu3";
 
 function Navbar() {
   return (
     <div className="navbar">
-      <a href="/">
+      <Link to="/">
         <h3>ATM LOGO</h3>
-      </a>
+      </Link>
       <ul>
         <li>
-          <a href="/menu1">ATM이란?</a>
+          <Link to="/menu1">ATM이란?</Link>
         </li>
         <li>
-          <a href="/menu2">ATM 사용하기</a>
+          <Link to="/menu2">ATM 사용하기</Link>
         </li>
         <li>
-          <a href="/menu3">백테스트</a>
+          <Link to="/menu3">백테스트</Link>
         </li>
         <li>
-          <a href="/menu4">ATM 메뉴얼</a>
+          <Link to="/menu4">ATM 메뉴얼</Link>
         </li>
       </ul>
     </div>
   );
 }
 
+function Home() {
+  return (
+    <div>
+      <h2>홈페이지</h2>
+      <p>이곳은 홈페이지의 내용입니다.</p>
+    </div>
+  );
+}
+
 function App() {
   return (
-    <div className="App">
-      <Navbar />
-      {/* navbar 외의 주요 컨텐츠를 여기에 추가 */}
-    </div>
+    <Router>
+      <div className="App">
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/menu1" element={<Menu1 />} />
+          <Route path="/menu2" element={<Menu2 />} />
+          <Route path="/menu3" element={<Menu3 />} />
+        </Routes>
+      </div>
+    </Router>
   );
 }
 
