@@ -15,6 +15,7 @@ ACNT_PRDT_CD = _cfg['ACNT_PRDT_CD']
 DISCORD_WEBHOOK_URL = _cfg['DISCORD_WEBHOOK_URL']
 URL_BASE = _cfg['URL_BASE']
 
+
 def send_message(msg):
     """디스코드 메세지 전송"""
     now = datetime.datetime.now()
@@ -145,7 +146,7 @@ def get_balance():
         "OVRS_ICLD_YN": "Y"
     }
     res = requests.get(URL, headers=headers, params=params)
-    cash = res.json()['output']['ord_psbl_cash']
+    cash = res.json()['output']['ord_psbl_frcr_amt_wcrc']
     send_message(f"주문 가능 현금 잔고: {cash}원")
     return int(cash)
 
@@ -242,22 +243,25 @@ try:
     amex_symbol_list = ["LABU"] # 매수 희망 종목 리스트 (AMEX)
     symbol_list = nasd_symbol_list + nyse_symbol_list + amex_symbol_list
     bought_list = [] # 매수 완료된 종목 리스트
-    total_cash = get_balance() # 보유 현금 조회
     exchange_rate = get_exchange_rate() # 환율 조회
+    total_cash = get_balance() / exchange_rate # 보유 현금 조회(달러)
+    print(total_cash)
     stock_dict = get_stock_balance() # 보유 주식 조회
     for sym in stock_dict.keys():
+        
         bought_list.append(sym)
-    target_buy_count = 2 # 매수할 종목 수
-    buy_percent = 0.50 # 종목당 매수 금액 비율
-    buy_amount = total_cash * buy_percent / exchange_rate # 종목별 주문 금액 계산 (달러)
+    target_buy_count = 3 # 매수할 종목 수
+    buy_percent = 0.5 # 종목당 매수 금액 비율
+    buy_amount = total_cash * buy_percent # 종목별 주문 금액 계산 (달러)
     soldout = False
+    print(buy_amount)
 
-    send_message("===해외 주식 자동매매 프로그램을 시작합니다===")
+    send_message("===현금 10억원을 달성했습니다. 출금해주세요.===")
     while True:
         t_now = datetime.datetime.now(timezone('America/New_York')) # 뉴욕 기준 현재 시간
         t_9 = t_now.replace(hour=9, minute=30, second=0, microsecond=0)
         t_start = t_now.replace(hour=9, minute=35, second=0, microsecond=0)
-        t_sell = t_now.replace(hour=15, minute=45, second=0, microsecond=0)
+        t_sell = t_now.replace(hour=15, minute=30, second=0, microsecond=0)
         t_exit = t_now.replace(hour=15, minute=50, second=0,microsecond=0)
         today = t_now.weekday()
         if today == 5 or today == 6:  # 토요일이나 일요일이면 자동 종료
@@ -274,12 +278,15 @@ try:
                     market1 = "AMEX"
                     market2 = "AMS"
                 sell(market=market1, code=sym, qty=qty, price=get_current_price(market=market2, code=sym))
+           #     print("잔여수량매도:" + qty)
             soldout == True
             bought_list = []
             time.sleep(1)
             stock_dict = get_stock_balance()
         if t_start < t_now < t_sell :  # AM 09:35 ~ PM 03:45 : 매수
             for sym in symbol_list:
+             #   print(len(bought_list))
+              #  print(target_buy_count)
                 if len(bought_list) < target_buy_count:
                     if sym in bought_list:
                         continue
@@ -292,6 +299,7 @@ try:
                         market1 = "AMEX"
                         market2 = "AMS"
                     target_price = get_target_price(market2, sym)
+                    print(target_price)
                     current_price = get_current_price(market2, sym)
                     if target_price < current_price:
                         buy_qty = 0  # 매수할 수량 초기화
@@ -304,6 +312,7 @@ try:
                             if sym in amex_symbol_list:
                                 market = "AMEX"
                             result = buy(market=market1, code=sym, qty=buy_qty, price=get_current_price(market=market2, code=sym))
+                          #  print("매수 수량: " + str(buy_qty))
                             time.sleep(1)
                             if result:
                                 soldout = False
@@ -314,7 +323,7 @@ try:
             if t_now.minute == 30 and t_now.second <= 5: 
                 get_stock_balance()
                 time.sleep(5)
-        if t_sell < t_now < t_exit:  # PM 03:45 ~ PM 03:50 : 일괄 매도
+        if t_sell < t_now < t_exit:  # PM 03:30 ~ PM 03:50 : 일괄 매도
             if soldout == False:
                 stock_dict = get_stock_balance()
                 for sym, qty in stock_dict.items():
@@ -326,7 +335,11 @@ try:
                     if sym in amex_symbol_list:
                         market1 = "AMEX"
                         market2 = "AMS"
-                    sell(market=market1, code=sym, qty=qty, price=get_current_price(market=market2, code=sym))
+                    sell_price = get_current_price(market=market2, code=sym) * 0.95
+                    sell(market=market1, code=sym, qty=qty, price=sell_price)
+                #    print("sell_stock_dict: " + stock_dict)
+                 #   print("일반 일괄매도수량" + qty)
+                 #   print("sell_get_current_price:" + get_current_price )
                 soldout = True
                 bought_list = []
                 time.sleep(1)
@@ -336,4 +349,3 @@ try:
 except Exception as e:
     send_message(f"[오류 발생]{e}")
     time.sleep(1)
-
